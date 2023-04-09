@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 
-const OPENAI_URL = "api.openai.com";
+const OPENAI_URL = "chatgpt-test01.openai.azure.com";
 const DEFAULT_PROTOCOL = "https";
 const PROTOCOL = process.env.PROTOCOL ?? DEFAULT_PROTOCOL;
 const BASE_URL = process.env.BASE_URL ?? OPENAI_URL;
@@ -14,6 +14,7 @@ export async function requestOpenai(req: NextRequest) {
   return fetch(`${PROTOCOL}://${BASE_URL}/${openaiPath}`, {
     headers: {
       "Content-Type": "application/json",
+      "api-key": "8d54752eb616488f908bd32a5d0c36bb",
       Authorization: `Bearer ${apiKey}`,
     },
     method: req.method,

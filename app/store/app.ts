@@ -11,6 +11,7 @@ import { isMobileScreen, trimTopic } from "../utils";
 
 import Locale from "../locales";
 import { showToast } from "../components/ui-lib";
+import { AzureCompletionResponse } from "../api/azure/requestapi";
 
 export type Message = ChatCompletionResponseMessage & {
   date: string;
@@ -18,6 +19,8 @@ export type Message = ChatCompletionResponseMessage & {
   isError?: boolean;
   id?: number;
 };
+
+export type azureAIMessage = AzureCompletionResponse;
 
 export function createMessage(override: Partial<Message>): Message {
   return {
@@ -332,7 +335,7 @@ export const useChatStore = create<ChatStore>()(
         const isLastSession = get().sessions.length === 1;
         if (!isMobileScreen() || confirm(Locale.Home.DeleteChat)) {
           get().removeSession(index);
-          
+
           showToast(Locale.Home.DeleteToast, {
             text: Locale.Home.Revert,
             onClick() {

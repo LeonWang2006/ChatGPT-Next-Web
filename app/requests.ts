@@ -64,7 +64,10 @@ export function requestOpenaiClient(path: string) {
 export async function requestChat(messages: Message[]) {
   const req: ChatRequest = makeRequestParam(messages, { filterBot: true });
 
-  const res = await requestOpenaiClient("v1/chat/completions")(req);
+  // const res = await requestOpenaiClient("v1/chat/completions")(req);
+  const res = await requestOpenaiClient(
+    "/openai/deployments/ChatBot/completions?api-version=2022-12-01",
+  )(req);
 
   try {
     const response = (await res.json()) as ChatReponse;
@@ -140,17 +143,32 @@ export async function requestChatStream(
   const controller = new AbortController();
   const reqTimeoutId = setTimeout(() => controller.abort(), TIME_OUT_MS);
 
+  const prompt = {
+    prompt:
+      req.messages != undefined && req.messages.length > 0
+        ? req.messages.at(-1).content
+        : req.messages[0].content,
+    max_tokens: 300,
+  };
+
+  console.log(prompt);
+
   try {
-    const res = await fetch("/api/chat-stream", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        path: "v1/chat/completions",
-        ...getHeaders(),
+    const res = await fetch(
+      "https://chatgpt-test01.openai.azure.com/openai/deployments/ChatBot/completions?api-version=2022-12-01",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "api-key": "8d54752eb616488f908bd32a5d0c36bb",
+          // path: "v1/chat/completions",
+          path: "/openai/deployments/ChatBot/completions?api-version=2022-12-01",
+          ...getHeaders(),
+        },
+        body: JSON.stringify(prompt),
+        signal: controller.signal,
       },
-      body: JSON.stringify(req),
-      signal: controller.signal,
-    });
+    );
     clearTimeout(reqTimeoutId);
 
     let responseText = "";
@@ -163,7 +181,6 @@ export async function requestChatStream(
     if (res.ok) {
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
-
       options?.onController?.(controller);
 
       while (true) {
@@ -205,6 +222,7 @@ export async function requestWithPrompt(messages: Message[], prompt: string) {
     },
   ]);
 
+  console.log("requestWithPrompt", messages);
   const res = await requestChat(messages);
 
   return res?.choices?.at(0)?.message?.content ?? "";
