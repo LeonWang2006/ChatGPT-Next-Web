@@ -68,6 +68,7 @@ export async function requestChat(messages: Message[]) {
   const res = await requestOpenaiClient(
     "/openai/deployments/ChatBot/completions?api-version=2022-12-01",
   )(req);
+  console.log("azure-req", req);
 
   try {
     const response = (await res.json()) as ChatReponse;
@@ -146,12 +147,12 @@ export async function requestChatStream(
   const prompt = {
     prompt:
       req.messages != undefined && req.messages.length > 0
-        ? req.messages.at(-1).content
+        ? req.messages[req.messages.length - 1].content
         : req.messages[0].content,
-    max_tokens: 300,
+    max_tokens: 2000,
   };
 
-  console.log(prompt);
+  console.log("promptAI", prompt);
 
   try {
     const res = await fetch(
@@ -189,7 +190,14 @@ export async function requestChatStream(
         const content = await reader?.read();
         clearTimeout(resTimeoutId);
         const text = decoder.decode(content?.value);
-        responseText += text;
+        console.log("text", text);
+        const jsonText = JSON.parse(text);
+
+        if (jsonText != undefined) {
+          responseText += jsonText.choices[0].text;
+        } else {
+          responseText += text;
+        }
 
         const done = !content || content.done;
         options?.onMessage(responseText, false);
@@ -224,6 +232,8 @@ export async function requestWithPrompt(messages: Message[], prompt: string) {
 
   console.log("requestWithPrompt", messages);
   const res = await requestChat(messages);
+
+  console.log("requestChat-res", res);
 
   return res?.choices?.at(0)?.message?.content ?? "";
 }
