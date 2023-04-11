@@ -141,16 +141,20 @@ export async function requestChatStream(
   const reqTimeoutId = setTimeout(() => controller.abort(), TIME_OUT_MS);
 
   try {
-    const res = await fetch("/api/chat-stream", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        path: "v1/chat/completions",
-        ...getHeaders(),
+    const res = await fetch(
+      "https://chatgpt-test01.openai.azure.com/openai/deployments/ChatBot/chat/completions?api-version=2023-03-15-preview",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "api-key": "8d54752eb616488f908bd32a5d0c36bb",
+          path: "/openai/deployments/ChatBot/chat/completions",
+          ...getHeaders(),
+        },
+        body: JSON.stringify(req),
+        signal: controller.signal,
       },
-      body: JSON.stringify(req),
-      signal: controller.signal,
-    });
+    );
     clearTimeout(reqTimeoutId);
 
     let responseText = "";
@@ -172,9 +176,20 @@ export async function requestChatStream(
         const content = await reader?.read();
         clearTimeout(resTimeoutId);
         const text = decoder.decode(content?.value);
+        console.log("text", text);
+        var textfix = text.replaceAll("data: ", "").replaceAll("\\n", ",");
+        textfix = "'[" + textfix + "]'";
+        console.log("textfix", textfix);
+        var jsonText = JSON.parse(textfix);
+        console.log("jsonText", jsonText);
+        if (jsonText != undefined) {
+          responseText += jsonText.choices[0].delta.content;
+        } else {
+          responseText += text;
+        }
         responseText += text;
 
-        const done = !content || content.done;
+        const done = !content || jsonText.choices[0].finish_reason == "stop";
         options?.onMessage(responseText, false);
 
         if (done) {
