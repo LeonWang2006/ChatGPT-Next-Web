@@ -177,20 +177,24 @@ export async function requestChatStream(
         const content = await reader?.read();
         clearTimeout(resTimeoutId);
         const text = decoder.decode(content?.value);
-        console.log("text", text);
+        //console.log("text", text);
         // var textfix = text.replaceAll("data: ", "").replaceAll("\\n", ",");
         // textfix = "'[" + textfix + "]'";
         // console.log("textfix", textfix);
-        var jsonText = JSON.parse(text);
+        if (!!text) {
+          var jsonText = JSON.parse(text);
+          responseText += jsonText.choices[0].message.content;
+        } else {
+          responseText += "";
+        }
         // console.log("jsonText", jsonText);
         // if (jsonText != undefined) {
         //   responseText += jsonText.choices[0].delta.content;
         // } else {
         //   responseText += text;
         // }
-        responseText += jsonText.choices[0].message.content;
 
-        const done = !content || jsonText.choices[0].finish_reason == "stop";
+        const done = !content || content.done;
         options?.onMessage(responseText, false);
 
         if (done) {
