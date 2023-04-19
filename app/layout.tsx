@@ -2,12 +2,15 @@
 import "./styles/globals.scss";
 import "./styles/markdown.scss";
 import "./styles/highlight.scss";
-import process from "child_process";
+import childProcess from "child_process";
 import { ACCESS_CODES, IS_IN_DOCKER } from "./api/access";
+import Providers from "./providers";
+import { Session } from "next-auth";
+import { headers } from "next/headers";
 
 let COMMIT_ID: string | undefined;
 try {
-  COMMIT_ID = process
+  COMMIT_ID = childProcess
     // .execSync("git describe --tags --abbrev=0")
     .execSync("git rev-parse --short HEAD")
     .toString()
@@ -26,6 +29,18 @@ export const metadata = {
   themeColor: "#fafafa",
 };
 
+async function getSession(cookie: string): Promise<Session> {
+  const response = await fetch(`http://47.120.36.111/api/auth/session`, {
+    headers: {
+      cookie,
+    },
+  });
+
+  const session = await response.json();
+
+  return Object.keys(session).length > 0 ? session : null;
+}
+
 function Meta() {
   const metas = {
     version: COMMIT_ID ?? "unknown",
@@ -41,11 +56,12 @@ function Meta() {
   );
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await getSession(headers().get("cookie") ?? "");
   return (
     <html lang="en">
       <head>
@@ -68,7 +84,9 @@ export default function RootLayout({
         ></link>
         <script src="/serviceWorkerRegister.js" defer></script>
       </head>
-      <body>{children}</body>
+      <body>
+        <Providers session={session}>{children}</Providers>
+      </body>
     </html>
   );
 }

@@ -18,9 +18,16 @@ export const authOptions: NextAuthOptions = {
     colorScheme: "light",
   },
   callbacks: {
-    async jwt({ token }) {
-      token.userRole = "admin";
-      return token;
+    async signIn({ user }) {
+      let isAllowedToSignIn = true;
+      const allowedUser = ["YOURGITHUBACCID"];
+      console.log(user);
+      if (allowedUser.includes(String(user.id))) {
+        isAllowedToSignIn = true;
+      } else {
+        isAllowedToSignIn = false;
+      }
+      return isAllowedToSignIn;
     },
   },
 };
