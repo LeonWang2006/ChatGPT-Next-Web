@@ -5,8 +5,6 @@ import "./styles/highlight.scss";
 import childProcess from "child_process";
 import { ACCESS_CODES, IS_IN_DOCKER } from "./api/access";
 import Providers from "./providers";
-import { Session } from "next-auth";
-import { headers } from "next/headers";
 
 let COMMIT_ID: string | undefined;
 try {
@@ -29,18 +27,6 @@ export const metadata = {
   themeColor: "#fafafa",
 };
 
-async function getSession(cookie: string): Promise<Session> {
-  const response = await fetch(`http://47.120.36.111/api/auth/session`, {
-    headers: {
-      cookie,
-    },
-  });
-
-  const session = await response.json();
-
-  return Object.keys(session).length > 0 ? session : null;
-}
-
 function Meta() {
   const metas = {
     version: COMMIT_ID ?? "unknown",
@@ -61,7 +47,6 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getSession(headers().get("cookie") ?? "");
   return (
     <html lang="en">
       <head>
@@ -85,7 +70,7 @@ export default async function RootLayout({
         <script src="/serviceWorkerRegister.js" defer></script>
       </head>
       <body>
-        <Providers session={session}>{children}</Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
