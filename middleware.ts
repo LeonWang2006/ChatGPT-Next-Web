@@ -1,12 +1,24 @@
+'use client'
 import { NextRequest, NextResponse } from "next/server";
 import { ACCESS_CODES } from "./app/api/access";
 import md5 from "spark-md5";
+import { getToken } from "next-auth/jwt"
+import { getSession, signIn, signOut } from "next-auth/react"
 
 export const config = {
-  matcher: ["/api/openai", "/api/chat-stream"],
+  matcher: ["/api/openai", "/api/chat-stream", '/((?!api|_next/static|_next/image|favicon.ico).*)',],
 };
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
+
+  const session = await getSession();
+  //未授权，跳转到登录页面
+  if (!session) {
+    const url = req.nextUrl.clone();
+    url.pathname = '/user/login';
+    return NextResponse.rewrite(url)
+  }
+
   const accessCode = req.headers.get("access-code");
   const token = req.headers.get("token");
   const hashedCode = md5.hash(accessCode ?? "").trim();
@@ -15,6 +27,10 @@ export function middleware(req: NextRequest) {
   console.log("[Auth] got access code:", accessCode);
   console.log("[Auth] hashed access code:", hashedCode);
 
+  // const url = req.nextUrl.clone();
+  // url.pathname = "/user/login";
+
+  // return NextResponse.rewrite(url);
   if (ACCESS_CODES.size > 0 && !ACCESS_CODES.has(hashedCode) && !token) {
     return NextResponse.json(
       {
