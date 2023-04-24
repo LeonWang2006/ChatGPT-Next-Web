@@ -6,7 +6,8 @@ import { getToken } from "next-auth/jwt"
 import { getSession, signIn, signOut } from "next-auth/react"
 
 export const config = {
-  matcher: ["/api/openai", "/api/chat-stream", '/((?!api|_next/static|_next/image|favicon.ico).*)',],
+  matcher: ["/api/openai", "/api/chat-stream", '/login/:path*', '/'],
+  // matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };
 
 export async function middleware(req: NextRequest) {
@@ -14,9 +15,7 @@ export async function middleware(req: NextRequest) {
   const session = await getSession();
   //未授权，跳转到登录页面
   if (!session) {
-    const url = req.nextUrl.clone();
-    url.pathname = '/user/login';
-    return NextResponse.rewrite(url)
+    return NextResponse.rewrite(new URL('/login', req.url))
   }
 
   const accessCode = req.headers.get("access-code");
@@ -27,10 +26,6 @@ export async function middleware(req: NextRequest) {
   console.log("[Auth] got access code:", accessCode);
   console.log("[Auth] hashed access code:", hashedCode);
 
-  // const url = req.nextUrl.clone();
-  // url.pathname = "/user/login";
-
-  // return NextResponse.rewrite(url);
   if (ACCESS_CODES.size > 0 && !ACCESS_CODES.has(hashedCode) && !token) {
     return NextResponse.json(
       {

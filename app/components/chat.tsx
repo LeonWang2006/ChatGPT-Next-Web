@@ -41,6 +41,7 @@ import styles from "./home.module.scss";
 import chatStyle from "./chat.module.scss";
 
 import { Input, Modal, showModal } from "./ui-lib";
+import { signOut } from "next-auth/react";
 
 const Markdown = dynamic(
   async () => memo((await import("./markdown")).Markdown),
@@ -329,6 +330,20 @@ function useScrollToBottom() {
   };
 }
 
+// 增加注销操作
+function _logOut() {
+  return (
+    <div className={styles["window-action-button"]}>
+      <IconButton
+        icon={<DeleteIcon />}
+        bordered
+        title={Locale.Chat.Actions.Logout}
+        onClick={() => signOut()}
+      />
+    </div>
+  );
+}
+
 export function Chat(props: {
   showSideBar?: () => void;
   sideBarShowing?: boolean;
@@ -584,6 +599,7 @@ export function Chat(props: {
               }}
             />
           </div>
+          <_logOut />
         </div>
 
         <PromptToast

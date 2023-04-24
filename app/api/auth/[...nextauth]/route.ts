@@ -9,6 +9,7 @@ import AzureADProvider from "next-auth/providers/azure-ad";
 async function refreshAccessToken(token: JWT) {
   try {
     const url = `https://login.microsoftonline.com/${process.env.AZURE_AD_TENANT_ID}/oauth2/v2/0/token`;
+    console.log(url);
 
     const body = new URLSearchParams({
       client_id: process.env.AZURE_AD_TENANT_ID || "AZURE_AD_TENANT_ID",
@@ -50,10 +51,10 @@ async function refreshAccessToken(token: JWT) {
 export const authOptions: NextAuthOptions = {
   providers: [
     AzureADProvider({
-      clientId: process.env.AZURE_AD_CLIENT_ID || "azure-ad-client-id",
+      clientId: "72573774-5324-4c0a-8ed4-1b63478997bf" || "azure-ad-client-id",
       clientSecret:
-        process.env.AZURE_AD_CLIENT_SECRET || "azure-ad-client-secret",
-      tenantId: process.env.AZURE_AD_TENANT_ID || "azure-ad-tenant-id",
+        "Qr.8Q~q1fG.j9PSxdtx76ndfB3Mz3hiu_VohEcPA" || "azure-ad-client-secret",
+      tenantId: "5963d619-ea9d-40bf-8f0f-5b90999ea3f9" || "azure-ad-tenant-id",
       authorization: {
         params: { scope: "email openid profile offline_access" },
       },
