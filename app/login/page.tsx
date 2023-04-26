@@ -2,6 +2,7 @@
 import { Analytics } from "@vercel/analytics/react";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { Home } from "../components/home";
+import styles from "./page.module.scss";
 
 export default function Page() {
   // return <h1>wangfl</h1>
@@ -9,12 +10,15 @@ export default function Page() {
   if (session) {
     return (
       <>
-        {/* <span className="mr-1">{session?.user?.email}</span>
-        <button onClick={() => signOut()}>登出</button> */}
         <Home />
         <Analytics />
       </>
     );
+  } else {
+    return (
+      <button className={styles["button"]} onClick={() => signIn()}>
+        点击进入 ChatGPT
+      </button>
+    );
   }
-  return <button onClick={() => signIn()}>登录</button>;
 }

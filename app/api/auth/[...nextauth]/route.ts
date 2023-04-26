@@ -1,10 +1,7 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import { JWT } from "next-auth/jwt";
-// import CredentialsProvider from "next-auth/providers/credentials";
+import CredentialsProvider from "next-auth/providers/credentials";
 import AzureADProvider from "next-auth/providers/azure-ad";
-
-//export const authOptions = {
-//}
 
 async function refreshAccessToken(token: JWT) {
   try {
@@ -51,6 +48,7 @@ async function refreshAccessToken(token: JWT) {
 export const authOptions: NextAuthOptions = {
   providers: [
     AzureADProvider({
+      name: "Azure AD",
       clientId: "72573774-5324-4c0a-8ed4-1b63478997bf" || "azure-ad-client-id",
       clientSecret:
         "Qr.8Q~q1fG.j9PSxdtx76ndfB3Mz3hiu_VohEcPA" || "azure-ad-client-secret",
@@ -59,13 +57,39 @@ export const authOptions: NextAuthOptions = {
         params: { scope: "email openid profile offline_access" },
       },
     }),
+    CredentialsProvider({
+      name: "Email",
+      credentials: {
+        email: {
+          label: "Email",
+          type: "email",
+          placeholder: "example@example.com",
+        },
+        password: {
+          label: "Password",
+          type: "password",
+          placeholder: "your password",
+        },
+      },
+      async authorize(credentials) {
+        const user = { id: "1", name: "Admin", email: credentials?.email };
+        if (
+          credentials?.password == "aS6?mW" &&
+          user.email == "wangfl@8818.com"
+        ) {
+          return user;
+        } else {
+          return null;
+        }
+      },
+    }),
   ],
   session: {
     strategy: "jwt",
   },
   secret: process.env.JWT_SECRET || "JWT_SECRET",
   callbacks: {
-    async jwt({ token, user, account, profile }) {
+    async jwt({ token, user, account }) {
       if (account && user) {
         return {
           accessToken: account.id_token,
@@ -105,83 +129,7 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-  // session: {
-  //   strategy: "jwt",
-  // },
-  // providers: [
-  //   CredentialsProvider({
-  //     name: "Sign in",
-  //     credentials: {
-  //       email: {
-  //         label: "Email",
-  //         type: "email",
-  //         placeholder: "example@example.com",
-  //       },
-  //       password: { label: "Password", type: "password" },
-  //     },
-  //     async authorize(credentials) {
-  //       console.log(credentials);
-  //       const user = { id: "1", name: "Admin", email: "admin@admin.com" };
-  //       return user;
-  //     },
-  //   }),
-  // ],
 };
 
 const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
-
-// export default NextAuth({
-//   providers: [
-//     AzureADProvider({
-//       clientId: process.env.AZURE_AD_CLIENT_ID || "azure-ad-client-id",
-//       clientSecret:
-//         process.env.AZURE_AD_CLIENT_SECRET || "azure-ad-client-secret",
-//       tenantId: process.env.AZURE_AD_TENANT_ID || "azure-ad-tenant-id",
-//       authorization: {
-//         params: { scope: "email openid profile offline_access" },
-
-//       }
-//     }),
-//   ],
-//   session: {
-//     strategy: "jwt"
-//   },
-//   secret: process.env.JWT_SECRET || "JWT_SECRET",
-//   callbacks: {
-//     async jwt({ token, user, account, profile }) {
-//       if (account && user) {
-//         return {
-//           accessToken: account.id_token,
-//           accessTokenExpires: account?.expires_at ? account.expires_at * 1000 : 0,
-//           user,
-//         };
-//       }
-
-//       if (Date.now() < (token as JWT & { accessTokenExpires: number }).accessTokenExpires || 0) {
-//         return token;
-//       }
-//       return refreshAccessToken(token);
-//     },
-//     async session({ session, token }: any) {
-//       if (session) {
-//         const profileImageUrl = `https://graph.microsoft.com/v1.0/me/photo/$value`;
-//         const response = await fetch(profileImageUrl, {
-//           headers: {
-//             authorization: `Bearer ${token.accessToken}`,
-//           },
-//         });
-//         const profileData = await response.json();
-//         session.user = token.user;
-//         session.error = token.error;
-//         session.user.access_token_expires_at = token.accessTokenExpires;
-//         session.expires = token.accessTokenExpires;
-//         if (response.ok) {
-//           session.user.profile_image = profileData;
-//         }
-//       }
-//       return session;
-//     },
-//   },
-
-// });
