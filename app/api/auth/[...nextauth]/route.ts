@@ -47,16 +47,16 @@ async function refreshAccessToken(token: JWT) {
 
 export const authOptions: NextAuthOptions = {
   providers: [
-    AzureADProvider({
-      name: "Azure AD",
-      clientId: "72573774-5324-4c0a-8ed4-1b63478997bf" || "azure-ad-client-id",
-      clientSecret:
-        "Qr.8Q~q1fG.j9PSxdtx76ndfB3Mz3hiu_VohEcPA" || "azure-ad-client-secret",
-      tenantId: "5963d619-ea9d-40bf-8f0f-5b90999ea3f9" || "azure-ad-tenant-id",
-      authorization: {
-        params: { scope: "email openid profile offline_access" },
-      },
-    }),
+    // AzureADProvider({
+    //   name: "Azure AD",
+    //   clientId: "72573774-5324-4c0a-8ed4-1b63478997bf" || "azure-ad-client-id",
+    //   clientSecret:
+    //     "Qr.8Q~q1fG.j9PSxdtx76ndfB3Mz3hiu_VohEcPA" || "azure-ad-client-secret",
+    //   tenantId: "5963d619-ea9d-40bf-8f0f-5b90999ea3f9" || "azure-ad-tenant-id",
+    //   authorization: {
+    //     params: { scope: "email openid profile offline_access" },
+    //   },
+    // }),
     CredentialsProvider({
       name: "Email",
       credentials: {
@@ -72,15 +72,41 @@ export const authOptions: NextAuthOptions = {
         },
       },
       async authorize(credentials) {
-        const user = { id: "1", name: "Admin", email: credentials?.email };
-        if (
-          credentials?.password == "aS6?mW" &&
-          user.email == "wangfl@8818.com"
-        ) {
-          return user;
-        } else {
-          return null;
+        /*
+        LsjsMpwEEgc88Zl9
+p2uqAnhjiTvgMAN2
+QPWCbrN6oGYDhEDo
+che0cinHekOaid0s
+nQ1SPXWGe60szhDl
+FyHuuMgfdwpqC6qT
+InKOnnldwaTTgQRl
+cMHLdYJUpAVrcmJm
+ZhVFkWzKsb6KqQIy
+DwFD68y8kvuejFdy
+*/
+        const users = [
+          { username: "test1@example.com", password: "LsjsMpwEEgc88Zl9" },
+          { username: "test2@example.com", password: "p2uqAnhjiTvgMAN2" },
+          { username: "test3@example.com", password: "QPWCbrN6oGYDhEDo" },
+          { username: "test4@example.com", password: "che0cinHekOaid0s" },
+          { username: "test5@example.com", password: "nQ1SPXWGe60szhDl" },
+          { username: "test6@example.com", password: "FyHuuMgfdwpqC6qT" },
+          { username: "test7@example.com", password: "InKOnnldwaTTgQRl" },
+          { username: "test8@example.com", password: "cMHLdYJUpAVrcmJm" },
+          { username: "test9@example.com", password: "ZhVFkWzKsb6KqQIy" },
+          { username: "test10@example.com", password: "DwFD68y8kvuejFdy" },
+        ];
+        for (let index = 0; index < users.length; index++) {
+          const element = users[index];
+          if (
+            element.username == credentials?.email &&
+            element.password == credentials?.password
+          ) {
+            const user = { id: "1", name: "Admin", email: element.username };
+            return user;
+          }
         }
+        return null;
       },
     }),
   ],
